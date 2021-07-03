@@ -1,0 +1,232 @@
+
+<div class="container-fluid mt-24">
+  <div class="card-grid">
+    <div class="card-header">
+      <div
+          fxFlex="100"
+          fxFlex.gt-xs="50"
+          ngClass.gt-xs="pr-4"
+          fxLayoutAlign="start center"
+          >
+          <h3 class="main-heading">
+          User List
+        </h3>
+      </div>
+        <div
+          fxFlex="100"
+          fxFlex.gt-xs="50"
+          ngClass.gt-xs="pr-4"
+          class="text-right"
+          >
+          <button mat-flat-button color="accent" routerLink="/main/users/add-user" class="btn">
+            Add user
+          </button>
+        </div>
+   </div>
+<div class="card-body">
+    <div class="table-filter p-18">
+      <div fxLayout="column" fxLayoutAlign="start" fxFlex="1 0 0">
+        <div fxLayout="row wrap" fxLayoutAlign="start" fxFlex="1 0 auto">
+          <mat-form-field
+            appearance="outline"
+            fxFlex="100"
+            fxFlex.gt-sm="15"
+            fxFlex.gt-xs="20"
+            ngClass.gt-xs="pr-4"
+          >
+            <mat-label>Name</mat-label>
+            <input matInput type="text" name="firstName" id="name" #input />
+          </mat-form-field>
+          <mat-form-field
+            appearance="outline"
+            fxFlex="100"
+            fxFlex.gt-sm="15"
+            fxFlex.gt-xs="20"
+            ngClass.gt-xs="pr-4 pl-4"
+          >
+            <mat-label>User Type</mat-label>
+            <mat-select
+              [(ngModel)]="selectedUser"
+              (selectionChange)="loadUserPage()"
+              name="userType"
+            >
+              <mat-option *ngFor="let role of roleList" [value]="role.id">{{
+              role.name
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field
+            appearance="outline"
+            fxFlex="100"
+            fxFlex.gt-sm="15"
+            fxFlex.gt-xs="20"
+            ngClass.gt-xs="pr-4 pl-4"
+          >
+            <mat-label>Inactive / Active</mat-label>
+            <mat-select
+              [(ngModel)]="selectedStatus"
+              (selectionChange)="loadUserPage()"
+              name="userStatus"
+            >
+              <mat-option [value]="1">Active</mat-option>
+              <mat-option [value]="2">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field
+            appearance="outline"
+            fxFlex="100"
+            fxFlex.gt-sm="15"
+            fxFlex.gt-xs="20"
+            ngClass.gt-xs="pr-4 pl-4"
+            *ngIf="!hideOrganization"
+          >
+            <mat-label>Organization</mat-label>
+            <mat-select
+              [(ngModel)]="selectedOrg"
+              (selectionChange)="loadUserPage()"
+              name="userType"
+            >
+              <mat-option *ngFor="let org of orgsList" [value]="org.id">{{
+                org.name
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div
+
+            fxFlex="100"
+            fxFlex.gt-sm="15"
+            fxFlex.gt-xs="20"
+            ngClass.gt-xs="pr-4 pl-4"
+            *ngIf="!isHidden"
+            class="hidden-field"
+          >
+
+          </div>
+          <div
+            fxFlex="100"
+            fxFlex.gt-sm="40"
+            fxFlex.gt-xs="20"
+            ngClass.gt-xs="pl-4"
+            fxLayoutAlign="end center"
+            ngClass.lt-sm="mb-24"
+          >
+          <mat-form-field
+              appearance="outline"
+              fxFlex="100"
+              fxFlex.gt-sm="35"
+              fxFlex.gt-xs="75"
+              ngClass.gt-sm="pr-4 pl-4"
+              ngClass.gt-xs="pl-4 pr-4"
+              class="padding-bottom-0"
+            >
+              <mat-label>Export As</mat-label>
+              <mat-select
+                name="status"
+                id="status"
+              >
+                <mat-option (click)="export('pdf')">Export As PDF</mat-option>
+                <mat-option (click)="export('csv')">Export As CSV</mat-option>
+              </mat-select>
+            </mat-form-field>
+      
+            <button
+              mat-stroked-button
+              (click)="resetUserGridFilters()"
+              color="warn"
+              class="ml-12 btn"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table mat-table [dataSource]="dataSource" matSort matSortActive="firstName" matSortDirection="asc" matSortDisableClear class="table">
+        <caption>
+          User Management Grid
+        </caption>
+        <ng-container matColumnDef="firstName">
+          <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>
+            User Name
+          </th>
+          <td mat-cell *matCellDef="let element" >
+            {{ element.firstName + ' ' + element.lastName }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="org.name" *ngIf="!hideOrganization">
+          <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>
+            Organization Name
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <div *ngIf="element.org !== null">{{ element.org?.name }}</div>
+            <div *ngIf="element.org === null && element.userOrgs && element.userOrgs.length > 1">
+              <ul class="orglist">
+                  <li *ngFor="let orgname of element.userOrgs;index as i;">{{orgname.orgId.name}}</li>
+              </ul>
+            </div>
+            <div *ngIf="element.org === null && element.userOrgs && element.userOrgs.length === 1">
+              <span *ngFor="let orgname of element.userOrgs;">{{orgname.orgId.name}}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Weight userType -->
+        <ng-container matColumnDef="role.name">
+          <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>
+            User Type
+          </th>
+          <td mat-cell *matCellDef="let element" >{{ element.role?.name }}</td>
+        </ng-container>
+
+        <!-- Symbol userEmail -->
+        <ng-container matColumnDef="email">
+          <th scope="col" mat-header-cell *matHeaderCellDef mat-sort-header>
+            User Email
+          </th>
+          <td mat-cell *matCellDef="let element">{{ element.email }}</td>
+        </ng-container>
+
+        <!-- Symbol userActiveDeactive -->
+        <ng-container matColumnDef="status.name">
+          <th scope="col" class="text-center" mat-header-cell *matHeaderCellDef mat-sort-header>
+            Inactive / Active 
+          </th>
+          <td mat-cell *matCellDef="let element" class="text-center">
+            <mat-slide-toggle *ngIf="(element.org !== null && element.role.name !== orgAdmin) || showEdit" [checked]="element.status?.id === 1"
+            (change)="onChangeStatus($event,element.id)"></mat-slide-toggle>
+            <!-- {{element.role.id}} {{showEdit}} {{element.org.id}} -->
+          </td>
+        </ng-container>
+
+        <!-- Symbol action -->
+        <ng-container matColumnDef="action">
+          <th scope="col" mat-header-cell *matHeaderCellDef class="text-center">Action</th>
+          <td mat-cell *matCellDef="let element" class="text-center">
+            <button mat-icon-button color="basic" *ngIf="(element.org !== null && element.role.name !== orgAdmin) || showEdit" class="btn-classic">
+              <mat-icon (click)="cellClicked(element)"
+              #tooltip="matTooltip"
+              matTooltip="Edit User"
+              [matTooltipPosition]="position.value"
+              matTooltipHideDelay="1000"
+              aria-label="Button that displays a tooltip that hides when scrolled out of the container"
+              class="spaceinicon"
+              >edit</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+    <mat-paginator
+      showFirstLastButtons
+      [length]="dataSource.rowCount"
+      [pageSize]="10"
+      [pageSizeOptions]="[10, 20, 50]"
+    ></mat-paginator>
+    </div>
+  </div>
+</div>

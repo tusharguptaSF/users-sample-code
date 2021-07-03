@@ -1,0 +1,21 @@
+/* css */
+@import '../../../theme/scss/fuse';
+
+body.theme-default {
+  .card-grid {
+    .img-profile{
+        width:70px;
+        height:70px;
+        margin:0 auto;
+    }
+    .hidden-field{
+        visibility: hidden!important;
+    }
+    .multiple-org .mat-form-field-infix{
+      width:300px!important;
+    }
+ }
+}
+.lowercase{
+  text-transform: lowercase;
+}
